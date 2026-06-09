@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <link rel="icon" type="image/png" sizes="512x512" href="ic_logo.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Vận Hành Hệ Thống PeerBuzz (P2P Chat)</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #e0e7ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, #0f172a, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    h2 .icon {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 20px 0 10px 0;
+      color: #1e293b;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #334155;
+    }
+
+    ul,
+    ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .code-block {
+      position: relative;
+      background-color: var(--code-bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 0.9rem;
+      color: #f8fafc;
+      margin: 0;
+    }
+
+    .code-block .lang {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .copy-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      color: #94a3b8;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #e2e8f0;
+      transform: scale(1.1);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    .copy-btn.copied {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #10b981;
+    }
+
+    .copy-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    code:not(pre code) {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-info {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .badge-success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .alert {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid;
+    }
+
+    .alert-info {
+      background-color: #f0fdf4;
+      border-left-color: var(--success);
+      color: #14532d;
+    }
+
+    .alert-warning {
+      background-color: #fffbeb;
+      border-left-color: var(--warning);
+      color: #78350f;
+    }
+
+    .step-list {
+      list-style-type: none;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .step-list::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background-color: var(--border);
+    }
+
+    .step-item {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .step-number {
+      position: absolute;
+      left: -30px;
+      top: 0;
+      width: 22px;
+      height: 22px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border: 3px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 12px;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        gap: 8px;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      .step-list {
+        padding-left: 24px;
+      }
+
+      .code-block {
+        padding: 12px;
+        font-size: 0.82rem;
+      }
+
+      .code-block .lang {
+        font-size: 0.65rem;
+      }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <img src="appIcon.png" alt="PeerBuzz Icon" class="logo-img">
+      <h1>Hướng Dẫn Chạy Hệ Thống PeerBuzz</h1>
+      <p class="subtitle">Bài tập lớn môn học: Các Hệ Thống Phân Tán (Chủ Đề 3 - P2P Chat)</p>
+    </header>
+
+    <!-- CARD 1: YÊU CẦU MÔI TRƯỜNG -->
+    <div class="card">
+      <h2><span class="icon">⚙️</span> 1. Chuẩn bị môi trường</h2>
+      <p>Trước khi chạy hệ thống, hãy cài đặt môi trường tương ứng cho thiết bị của bạn:</p>
+
+      <div class="grid-2">
+        <div>
+          <h3>Bootstrap Server (Cài đặt Dart SDK)</h3>
+
+          <h4 style="margin-top: 10px; font-size: 0.95rem; color: #475569;">Trên Máy macOS:</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 5px;">Cài đặt qua Homebrew:</p>
+          <div class="code-block" style="margin: 5px 0 15px 0;">
+            <span class="lang">bash</span>
+            <pre>brew tap dart-lang/dart
+brew install dart</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+
+          </div>
+
+          <h4 style="font-size: 0.95rem; color: #475569;">Trên Máy Windows:</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 5px;">Cài đặt qua Winget hoặc Chocolatey:</p>
+          <div class="code-block" style="margin: 5px 0 10px 0;">
+            <span class="lang">cmd</span>
+            <pre>winget install Dart.Dart</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+          <div class="code-block" style="margin: 5px 0 10px 0;">
+            <span class="lang">cmd</span>
+            <pre>choco install dart-sdk</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+
+          <p style="font-size: 0.9rem;">Kiểm tra phiên bản sau khi cài đặt:</p>
+          <div class="code-block" style="margin: 5px 0 0 0;">
+            <span class="lang">bash</span>
+            <pre>dart --version</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+        </div>
+        <div>
+          <h3>Peer Client (Cài đặt ứng dụng PeerBuzz)</h3>
+          <p>Ứng dụng khách đã được đóng gói sẵn cho các hệ điều hành, cài đặt nhanh chóng:</p>
+
+          <ul style="margin-top: 10px; font-size: 0.95rem;">
+            <li><strong>macOS</strong> (<code>PeerBuzz-macos.dmg</code>):
+              <p style="font-size: 0.85rem; margin-top: 3px; color: var(--text-muted);">Mở file <code>.dmg</code> và kéo
+                biểu tượng <strong>PeerBuzz</strong> vào thư mục <strong>Applications</strong> để sử dụng.</p>
+            </li>
+            <li><strong>Windows</strong> (<code>PeerBuzz-windows.zip</code>):
+              <p style="font-size: 0.85rem; margin-top: 3px; color: var(--text-muted);">Giải nén thư mục và chạy trực
+                tiếp file <code>peerbuzz.exe</code> để khởi động ứng dụng.</p>
+            </li>
+            <li><strong>Android</strong> (<code>PeerBuzz-android.apk</code>):
+              <p style="font-size: 0.85rem; margin-top: 3px; color: var(--text-muted);">Copy file <code>.apk</code> vào
+                điện thoại Android và tiến hành cài đặt trực tiếp.</p>
+            </li>
+            <li><strong>iOS</strong> (<code>PeerBuzz-ios.ipa</code>):
+              <p style="font-size: 0.85rem; margin-top: 3px; color: var(--text-muted);">Cài đặt thông qua TestFlight,
+                các công cụ ký chứng chỉ bên thứ 3 hoặc cài qua Xcode.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert alert-info" style="margin-top: 20px; margin-bottom: 0;">
+        <strong>Mẹo mạng LAN:</strong> Để các Peer trên thiết bị khác nhau (ví dụ: máy tính và điện thoại) có thể
+        kết nối trực tiếp, tất cả phải kết nối vào <strong>cùng một mạng Wi-Fi hoặc mạng nội bộ LAN</strong>.
+      </div>
+    </div>
+
+    <!-- CARD 2: RUN BOOTSTRAP SERVER -->
+    <div class="card">
+      <h2><span class="icon">🖥️</span> 2. Khởi chạy Bootstrap Server</h2>
+      <p>Bootstrap Server đóng vai trò hỗ trợ <strong>Peer Discovery</strong> (quản lý danh sách online và trả về các
+        địa chỉ IP:Port đang hoạt động).</p>
+
+      <ol class="step-list">
+        <li class="step-item">
+          <span class="step-number">1</span>
+          <strong>Di chuyển vào thư mục server:</strong>
+          <p>Mở terminal và di chuyển đến thư mục chứa Bootstrap Server.</p>
+          <div class="code-block">
+            <span class="lang">bash</span>
+            <pre>cd bootstrap_server</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">2</span>
+          <strong>Tải các thư viện phụ thuộc:</strong>
+          <p>Cập nhật dependencies cần thiết cho Dart project.</p>
+          <div class="code-block">
+            <span class="lang">bash</span>
+            <pre>dart pub get</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">3</span>
+          <strong>Khởi chạy server:</strong>
+          <p>Mặc định server sẽ chạy trên cổng <code>8888</code> lắng nghe tất cả các card mạng.</p>
+          <div class="code-block">
+            <span class="lang">bash</span>
+            <pre>dart run bin/bootstrap_server.dart</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+          <p>Khi chạy thành công, màn hình console sẽ hiển thị:</p>
+          <div class="code-block">
+            <span class="lang">output</span>
+            <pre>==============================================
+🚀 PeerBuzz Bootstrap Server is running
+📍 Address: 0.0.0.0:8888
+⏱  Timeout policy: 60s
+==============================================</pre>
+          </div>
+
+          <div style="margin: 15px 0 0 0; text-align: center;">
+            <video autoplay loop muted playsinline
+              style="max-width: 100%; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); border: 1px solid var(--border);">
+              <source src="Screen Recording 2026-06-09 at 10.28.58.mov" type="video/mp4">
+              Trình duyệt không hỗ trợ phát video.
+            </video>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; font-style: italic;">Minh họa quá
+              trình khởi chạy Bootstrap Server</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- CARD 3: RUN FLUTTER PEER CLIENT -->
+    <div class="card">
+      <h2><span class="icon">📱</span> 3. Khởi chạy và Kết nối Peer Client</h2>
+
+      <h3 style="margin-top: 0;">Bước 3.1: Xác định địa chỉ IP của Bootstrap Server</h3>
+      <p>Để các Client có thể kết nối tới Server, bạn cần tìm <strong>địa chỉ IP nội bộ (Local IP)</strong> của máy tính
+        đang chạy Bootstrap Server:</p>
+
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div style="background-color: #f8fafc; border: 1px dashed var(--border); padding: 15px; border-radius: 10px;">
+          <strong style="color: var(--primary);">Trên máy chủ macOS:</strong>
+          <p style="font-size: 0.9rem; margin-top: 5px;">Mở Terminal và gõ lệnh sau để lấy IP:</p>
+          <div class="code-block" style="padding: 10px; margin: 10px 0 0 0;">
+            <span class="lang">bash</span>
+            <pre>ipconfig getifaddr en0
+# Hoặc xem trong Cài đặt hệ thống > Wi-Fi / Mạng</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+        </div>
+        <div style="background-color: #f8fafc; border: 1px dashed var(--border); padding: 15px; border-radius: 10px;">
+          <strong style="color: var(--primary);">Trên máy chủ Windows:</strong>
+          <p style="font-size: 0.9rem; margin-top: 5px;">Mở Command Prompt (cmd) và gõ lệnh:</p>
+          <div class="code-block" style="padding: 10px; margin: 10px 0 0 0;">
+            <span class="lang">cmd</span>
+            <pre>ipconfig</pre>
+            <button class="copy-btn" onclick="copyCode(this)" title="Copy"><svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg></button>
+          </div>
+          <p style="font-size: 0.85rem; margin-top: 5px; color: var(--text-muted);">Tìm dòng <code>IPv4 Address</code>
+            của card mạng đang kết nối (ví dụ: 192.168.1.X).</p>
+        </div>
+      </div>
+
+      <h3>Bước 3.2: Cài đặt và Đăng nhập Client</h3>
+      <ol class="step-list">
+        <li class="step-item">
+          <span class="step-number">1</span>
+          <strong>Khởi chạy ứng dụng:</strong>
+          <p>Mở ứng dụng <strong>PeerBuzz</strong> đã cài đặt trên hệ điều hành tương ứng ở Bước 1.</p>
+        </li>
+        <li class="step-item">
+          <span class="step-number">2</span>
+          <strong>Nhập thông tin kết nối tại màn hình Đăng Nhập:</strong>
+          <ul>
+            <li><strong>Tên hiển thị</strong>: Nhập tên tùy chọn của bạn (ví dụ: <code>Peer_740</code>).</li>
+            <li><strong>Bootstrap Server Address</strong>:
+              <p style="margin-top: 5px; font-size: 0.9rem;">Nhập địa chỉ máy chủ theo định dạng:
+                <strong><code>[IP_Bootstrap]:[Port]</code></strong>
+              </p>
+              <ul>
+                <li>Nếu chạy Client trên <strong>cùng một máy</strong> với Server: Nhập <code>127.0.0.1:8888</code>.
+                </li>
+                <li>Nếu chạy Client trên <strong>thiết bị khác</strong> trong cùng mạng LAN: Nhập địa chỉ IP tìm thấy ở
+                  <strong>Bước 3.1</strong> kèm cổng <code>8888</code> (ví dụ: <code>192.168.1.18:8888</code>).
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+          <div style="margin: 15px 0; text-align: center;">
+            <img src="login_screen.png" alt="Màn hình đăng nhập PeerBuzz"
+              style="max-width: 500px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); border: 1px solid var(--border);">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; font-style: italic;">Giao diện nhập
+              địa chỉ Bootstrap Server trên ứng dụng Peer Client</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">3</span>
+          <strong>Tham gia mạng:</strong>
+          <p>Ấn nút <strong>Tham gia mạng</strong> để bắt đầu quá trình khám phá Peer và tham gia kết nối chat.</p>
+        </li>
+      </ol>
+    </div>
+
+    <!-- CARD 4: HƯỚNG DẪN THỬ NGHIỆM -->
+    <div class="card">
+      <h2><span class="icon">🧪</span> 4. Kịch bản kiểm thử (Demo Scenarios)</h2>
+      <p>Để kiểm chứng đầy đủ các tính năng phân tán nâng cao, hãy thực hiện kịch bản thử nghiệm sau:</p>
+
+      <h3>Kịch bản 1: Chat nhóm & Đồng hồ Lamport</h3>
+      <ol>
+        <li>Mở 3 client song song (ví dụ: Peer A, Peer B, Peer C).</li>
+        <li>Cả 3 cùng vào mục <strong>Chat Nhóm (Broadcast)</strong>.</li>
+        <li>Gửi tin nhắn liên tục và quan sát thứ tự tin nhắn. Nhờ cơ chế <strong>Đồng hồ Lamport (Lamport
+            Clock)</strong>, tin nhắn sẽ được sắp xếp đồng bộ về mặt thời gian logic trên cả 3 máy.</li>
+      </ol>
+
+      <h3>Kịch bản 2: Ngoại tuyến & Lưu trữ hộ (Store-and-forward)</h3>
+      <ol>
+        <li>Peer A đang chat với Peer B.</li>
+        <li>Tắt kết nối mạng hoặc tắt hẳn ứng dụng Peer B (Peer B offline).</li>
+        <li>Peer A gửi tin nhắn cho Peer B. Do mất kết nối trực tiếp, ứng dụng của Peer A sẽ tự động tìm kiếm một láng
+          giềng đang online khác (ví dụ Peer C) và gửi yêu cầu <code>storeFor</code>.</li>
+        <li>Peer C sẽ lưu trữ tạm thời tin nhắn này.</li>
+        <li>Mở lại Peer B online. Peer C phát hiện Peer B hoạt động trở lại từ danh sách cập nhật của Bootstrap, sau đó
+          tự động chuyển tiếp (forward) các tin nhắn đang lưu giữ cho Peer B.</li>
+      </ol>
+
+      <h3>Kịch bản 3: Gossip-down phát hiện sự cố nhanh</h3>
+      <ol>
+        <li>Khi Peer B đột ngột ngắt kết nối (không gửi gói <code>leave</code> chủ động).</li>
+        <li>Peer A thử gửi tin nhắn đến Peer B và thất bại (socket timeout).</li>
+        <li>Peer A sẽ ngay lập tức lan truyền gói tin <code>gossipDown</code> báo cáo Peer B offline cho các node láng
+          giềng khác để cập nhật giao diện ngay lập tức mà không cần đợi Bootstrap Server quét timeout (60 giây).</li>
+      </ol>
+    </div>
+
+    <footer>
+      <p>Hệ Thống Chat P2P PeerBuzz - Nhóm 08 - Các Hệ Thống Phân Tán © 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      var codeBlock = btn.closest('.code-block');
+      var pre = codeBlock.querySelector('pre');
+      var text = pre.innerText || pre.textContent;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          showCopied(btn);
+        }).catch(function () {
+          fallbackCopy(text, btn);
+        });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showCopied(btn);
+      } catch (e) {
+        alert('Không thể copy, hãy copy thủ công.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showCopied(btn) {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      setTimeout(function () {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+      }, 1500);
+    }
+  </script>
+
+</body>
+
+</html>
