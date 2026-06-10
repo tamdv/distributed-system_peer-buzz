@@ -28,7 +28,7 @@ SPEC CHECKSUMS:
   connectivity_plus: 0a976dfd033b59192912fa3c6c7b54aab5093802
   file_picker: e716a70a9fe5fd9e09ebc922d7541464289443af
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
 
 PODFILE CHECKSUM: 5bc6a71ad752a68d2b4bce2aeb96d0f7aab52719
 
