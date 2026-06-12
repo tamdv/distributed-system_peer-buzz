@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build Flutter – Windows Installer</title>
+  <style>
+    :root {
+      --bg: #1c1b1f;
+      --surface: #28272c;
+      --surface2: #322f38;
+      --border: #3a3740;
+      --accent: #ec6117;
+      --accent2: #ff8c42;
+      --text: #e6e1e5;
+      --text-dim: #9e99a5;
+      --green: #4caf82;
+      --blue: #82aaff;
+      --yellow: #ffca28;
+      --red: #f28b82;
+      --code-bg: #111014;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.7;
+      padding: 40px 20px 80px;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--accent) 0%, #b84a0e 100%);
+      border-radius: 16px;
+      padding: 36px 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; color: #fff; }
+    header p { color: rgba(255,255,255,0.82); margin-top: 6px; font-size: 1rem; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Section */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .step-num {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .step-num.req { background: var(--surface2); border: 1px solid var(--border); }
+    h2 { font-size: 1.15rem; font-weight: 600; color: var(--text); }
+
+    /* Requirements list */
+    .req-list { list-style: none; }
+    .req-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.93rem;
+    }
+    .req-list li:last-child { border-bottom: none; }
+    .req-list .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .req-list strong { color: var(--accent2); }
+
+    /* Code block */
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+    .code-label {
+      background: var(--surface2);
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border);
+    }
+    pre {
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.87rem;
+      line-height: 1.7;
+    }
+    .c-cmd   { color: var(--blue); }
+    .c-path  { color: var(--green); }
+    .c-cmt   { color: var(--text-dim); font-style: italic; }
+    .c-str   { color: var(--yellow); }
+    .c-key   { color: var(--accent2); }
+    .c-ok    { color: var(--green); }
+
+    /* Info box */
+    .info-box {
+      background: var(--surface2);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin: 12px 0;
+    }
+    .info-box strong { color: var(--text); }
+
+    /* Option cards */
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+    @media (max-width: 600px) { .options { grid-template-columns: 1fr; } }
+    .option-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .option-card.recommended { border-color: var(--accent); }
+    .option-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .tag {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .tag.rec { background: var(--accent); color: #fff; }
+    .tag.ent { background: #3d5afe22; color: var(--blue); border: 1px solid var(--blue); }
+    .option-desc { font-size: 0.83rem; color: var(--text-dim); margin-bottom: 10px; }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 0.88rem;
+    }
+    .flow-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Cascadia Code', monospace;
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+    .flow-box.accent { border-color: var(--accent); color: var(--accent2); }
+    .flow-arrow { color: var(--text-dim); font-size: 1.1rem; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    footer span { color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <h1>🪟 Build Flutter → Windows Installer</h1>
+    <p>Hướng dẫn đóng gói ứng dụng Flutter thành file cài đặt Windows</p>
+    <span class="badge">PeerBuzz · vn.vnpt.ONEDiscovery</span>
+  </header>
+
+  <!-- Requirements -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num req">✦</div>
+      <h2>Yêu cầu môi trường</h2>
+    </div>
+    <ul class="req-list">
+      <li>
+        <span class="icon">🖥️</span>
+        <div><strong>Windows machine</strong> — bắt buộc, không thể cross-compile từ macOS/Linux</div>
+      </li>
+      <li>
+        <span class="icon">🔧</span>
+        <div><strong>Visual Studio 2022</strong> — cần workload <strong>"Desktop development with C++"</strong></div>
+      </li>
+      <li>
+        <span class="icon">🐦</span>
+        <div><strong>Flutter SDK</strong> — phiên bản stable, đã bật Windows desktop support</div>
+      </li>
+      <li>
+        <span class="icon">📦</span>
+        <div><strong>Inno Setup</strong> (option A) hoặc package <strong>msix</strong> (option B) — để tạo installer</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">1</div>
+      <h2>Kiểm tra môi trường</h2>
+    </div>
+    <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:12px;">Chạy trên máy Windows, kiểm tra Flutter đã nhận đủ toolchain:</p>
+    <div class="code-wrap">
+      <div class="code-label">cmd / PowerShell</div>
+      <pre><span class="c-cmd">flutter</span> doctor</pre>
+    </div>
+    <div class="info-box">
+      Cần thấy <strong>[✓] Windows Version</strong> và <strong>[✓] Visual Studio – develop Windows apps</strong>.<br/>
+      Nếu thiếu Windows support, chạy thêm:
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">cmd / PowerShell</div>
+      <pre><span class="c-cmd">flutter</span> config <span class="c-str">--enable-windows-desktop</span></pre>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">2</div>
+      <h2>Build executable (release)</h2>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">cmd / PowerShell – từ thư mục gốc project</div>
+      <pre><span class="c-cmd">cd</span> <span class="c-path">peerbuzz</span>
+<span class="c-cmd">flutter</span> build windows <span class="c-str">--release</span></pre>
+    </div>
+    <div class="info-box">
+      Output tại: <strong>build\windows\x64\runner\Release\</strong><br/>
+      Thư mục chứa file <strong>.exe</strong> + toàn bộ DLL cần thiết.
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Chạy thử trực tiếp</div>
+      <pre><span class="c-path">build\windows\x64\runner\Release\peerbuzz.exe</span></pre>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">3</div>
+      <h2>Đóng gói thành Installer</h2>
+    </div>
+    <!-- Option A -->
+      <div class="option-card recommended">
+        <div class="option-title">
+          📦 Inno Setup
+          <span class="tag rec">Khuyên dùng</span>
+        </div>
+        <div class="option-desc">Miễn phí, đơn giản, ra file <code>.exe</code> cài đặt thông thường</div>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;">
+          1. Tải <strong>Inno Setup</strong> tại <code>jrsoftware.org/isdl.php</code><br/>
+          2. Tạo file script <code>setup.iss</code>:
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">setup.iss</div>
+          <pre><span class="c-key">[Setup]</span>
+<span class="c-cmd">AppName</span>=<span class="c-str">PeerBuzz</span>
+<span class="c-cmd">AppVersion</span>=<span class="c-str">1.0.0</span>
+<span class="c-cmd">DefaultDirName</span>=<span class="c-str">{autopf}\PeerBuzz</span>
+<span class="c-cmd">OutputBaseFilename</span>=<span class="c-str">PeerBuzz-Setup</span>
+<span class="c-cmd">Compression</span>=<span class="c-str">lzma2</span>
+<span class="c-cmd">SolidCompression</span>=<span class="c-str">yes</span>
+
+<span class="c-key">[Files]</span>
+<span class="c-cmd">Source</span>: <span class="c-str">"build\windows\x64\runner\Release\*"</span>
+<span class="c-cmd">DestDir</span>: <span class="c-str">"{app}"</span>
+<span class="c-cmd">Flags</span>: recursesubdirs
+
+<span class="c-key">[Icons]</span>
+<span class="c-cmd">Name</span>: <span class="c-str">"{autoprograms}\PeerBuzz"</span>
+<span class="c-cmd">Filename</span>: <span class="c-str">"{app}\peerbuzz.exe"</span>
+<span class="c-cmd">Name</span>: <span class="c-str">"{autodesktop}\PeerBuzz"</span>
+<span class="c-cmd">Filename</span>: <span class="c-str">"{app}\peerbuzz.exe"</span>
+
+<span class="c-key">[Run]</span>
+<span class="c-cmd">Filename</span>: <span class="c-str">"{app}\peerbuzz.exe"</span>
+<span class="c-cmd">Description</span>: <span class="c-str">"Launch PeerBuzz"</span>
+<span class="c-cmd">Flags</span>: postinstall</pre>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-dim);">3. Mở Inno Setup IDE → <strong>Compile</strong> → ra <code>PeerBuzz-Setup.exe</code></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Flow -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">4</div>
+      <h2>Tóm tắt luồng</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-box">flutter build windows --release</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box accent">Release\ folder</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">Inno Setup</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box accent">PeerBuzz-Setup.exe</div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num" style="background:var(--surface2);border:1px solid var(--border);">💡</div>
+      <h2>Lưu ý quan trọng</h2>
+    </div>
+    <ul class="req-list">
+      <li>
+        <span class="icon">⚠️</span>
+        <div>Phải build trên <strong>máy Windows thật hoặc VM Windows</strong> — macOS không thể build Windows app.</div>
+      </li>
+      <li>
+        <span class="icon">📁</span>
+        <div>Copy <strong>toàn bộ thư mục</strong> <code>Release\</code> vào Inno Setup — không chỉ file <code>.exe</code>. App cần DLLs đi kèm.</div>
+      </li>
+      <li>
+        <span class="icon">🔏</span>
+        <div>MSIX với <code>sign_msix: false</code> vẫn cài được trên máy dev (developer mode). Deploy qua portal cần <strong>code signing certificate</strong>.</div>
+      </li>
+      <li>
+        <span class="icon">🔄</span>
+        <div>Mỗi lần update app: chỉ cần tăng <code>versionCode</code> trong <code>pubspec.yaml</code>, build lại, recompile Inno Setup.</div>
+      </li>
+    </ul>
+  </div>
+
+  <footer>
+    PeerBuzz · <span>vn.vnpt.ONEDiscovery</span> · VNPT Technology · 2026
+  </footer>
+
+</div>
+</body>
+</html>
