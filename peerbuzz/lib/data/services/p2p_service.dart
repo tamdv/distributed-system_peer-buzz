@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/models/models.dart';
 import '../../core/protocol/lamport_clock.dart';
@@ -88,6 +89,9 @@ class P2PService with ChangeNotifier, WidgetsBindingObserver {
     _startHeartbeat(bootstrapIp, bootstrapPort);
 
     WidgetsBinding.instance.addObserver(this);
+
+    // Giữ máy không khóa màn hình để tránh OS treo socket P2P
+    WakelockPlus.enable();
   }
 
   @override
@@ -607,6 +611,7 @@ class P2PService with ChangeNotifier, WidgetsBindingObserver {
     _bootstrapSocket?.close();
     _isInitialized = false;
     onlinePeers.clear();
+    WakelockPlus.disable();
     notifyListeners();
   }
 
@@ -673,6 +678,7 @@ class P2PService with ChangeNotifier, WidgetsBindingObserver {
     _messageStreamController.close();
     _fileProgressController.close();
     _errorStreamController.close();
+    WakelockPlus.disable();
     super.dispose();
   }
 }

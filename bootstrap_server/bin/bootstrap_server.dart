@@ -28,7 +28,10 @@ class BootstrapServer {
     final server = await ServerSocket.bind(InternetAddress.anyIPv4, port);
     print('==============================================');
     print('🚀 PeerBuzz Bootstrap Server is running');
-    print('📍 Address: ${server.address.address}:${server.port}');
+    print('📨 Listening on: 0.0.0.0:${server.port}');
+    for (final ip in await _localIPv4Addresses()) {
+      print('📱 Client connect to  → $ip:${server.port}');
+    }
     print('⏱  Timeout policy: ${_timeout.inSeconds}s');
     print('==============================================');
 
@@ -37,6 +40,17 @@ class BootstrapServer {
     await for (var client in server) {
       _handleClient(client);
     }
+  }
+
+  Future<List<String>> _localIPv4Addresses() async {
+    final interfaces = await NetworkInterface.list(
+      type: InternetAddressType.IPv4,
+      includeLoopback: false,
+    );
+    return [
+      for (final iface in interfaces)
+        for (final addr in iface.addresses) addr.address,
+    ];
   }
 
   void _handleClient(Socket client) {
